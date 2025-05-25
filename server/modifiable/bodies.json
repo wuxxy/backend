@@ -1,0 +1,20 @@
+{
+  "UserData": [
+    {
+      "key": "username",
+      "type": "string"
+    },
+    {
+      "key": "age",
+      "type": "number"
+    },
+    {
+      "key": "metadata",
+      "type": "json"
+    },
+    {
+      "key": "isAdmin",
+      "type": "boolean"
+    }
+  ]
+}

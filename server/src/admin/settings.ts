@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
-import { updateJsonFile } from '../utils/update-json.js';
+import { updateJsonFile } from "../utils/file_manager.js";
 
 export default async function settingsRoutes(
   fastify: FastifyInstance,

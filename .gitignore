@@ -1,0 +1,36 @@
+# Ignore build output
+dist/
+*/dist/
+
+# Ignore dependencies
+node_modules/
+*/node_modules/
+
+# Ignore lock files (optional if you prefer clean clones)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Ignore environment variables
+.env
+.env.*
+
+# Ignore logs and temp files
+*.log
+logs/
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+
+# Ignore TypeScript metadata
+*.tsbuildinfo
+
+# Ignore IDEs
+.vscode/
+.idea/
+*.code-workspace
+
+# Ignore test coverage
+coverage/
+*/coverage/
