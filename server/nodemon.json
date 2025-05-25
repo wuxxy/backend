@@ -1,0 +1,6 @@
+{
+    "watch": ["dist"],
+    "ignore": ["package.json", "tsconfig.json", "node_modules"],
+    "ext": "js,json"
+  }
+  
