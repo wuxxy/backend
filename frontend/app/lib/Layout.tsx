@@ -136,34 +136,6 @@ appbarContent,
       {/* 🌐 Main Content */}
       <div className="relative flex flex-col flex-1">
         {/* 🧱 Top Appbar */}
-        <header className="sticky top-0 z-20 flex items-center justify-between w-full px-6 py-4 border-b border-white/10 bg-black/80 backdrop-blur-md">
-          <div className="flex items-center gap-4 text-sm font-medium tracking-wide text-white/80">
-            {appbarContent ?? (
-              <>
-                <Button
-                  variant="ghost"
-                  className="gap-2 text-xs"
-                  onClick={handleSave}
-                  disabled={!saveAvailable}
-                >
-                  <Save className="w-4 h-4" /> Save
-                </Button>
-                {lastSavedText && (
-                  <span className="hidden text-xs text-white/40 sm:inline">
-                    {lastSavedText}
-                  </span>
-                )}
-              </>
-            )}
-          </div>
-          <Button
-            onClick={logout}
-            variant="destructive"
-            className="text-sm shadow-[0_0_10px_#f43f5e55] gap-2"
-          >
-            <LogOut className="w-4 h-4" /> Logout
-          </Button>
-        </header>
 
         {/* 📦 Page Content */}
         <main className="flex-1 px-6 py-8 bg-gradient-to-br from-[#0e0e0e] to-black overflow-y-auto">

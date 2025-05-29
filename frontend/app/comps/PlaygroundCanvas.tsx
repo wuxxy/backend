@@ -7,9 +7,61 @@ import { ContextMenu } from "~/components/ui/context-menu";
 import { CustomContextMenu } from "./PlaygroundContextMenu";
 import { useInstanceStore, useViewportStore, type PlaygroundObject } from "~/lib/playgroundStore";
 import { MethodFormCard } from "./PlaygroundCards";
-import { GripVertical } from "lucide-react";
+import { GripVertical, Home, HomeIcon, SplinePointer } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 
 useStrictMode(true);
+
+export function MacMenubar({ save }: { save: any }) {
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes().toString().padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+  const weekday = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][
+    now.getDay()
+  ];
+
+  return (
+    <div className="sticky top-0 z-50 flex items-center justify-between h-6 px-3 text-[11px] font-medium text-white bg-black/80 backdrop-blur-sm shadow-sm select-none">
+      {/* Left side: app + menus */}
+      <div className="flex items-center gap-4 text-white/80">
+        <span className="text-xs font-semibold tracking-wide text-white">
+          Spline
+        </span>
+
+        <DropdownMenu key={"File"}>
+          <DropdownMenuTrigger className="p-2 transition-colors hover:text-white">
+            File
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="p-1 text-white border rounded-sm bg-neutral-900 border-white/10">
+            <DropdownMenuItem
+              onClick={save}
+              className="cursor-pointer hover:bg-white/10"
+            >
+              Save
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer hover:bg-white/10">
+              Another Option
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Right side: time + status */}
+      <div className="flex items-center gap-3 font-normal text-white/60">
+        <span>
+          {hours}:{minutes} {ampm} {weekday}
+        </span>
+        <span>🔋 100%</span>
+      </div>
+    </div>
+  );
+}
 
 const PlaygroundCanvas = () => {
   const pgParentRef = useRef<HTMLDivElement>(null);
@@ -49,7 +101,7 @@ const PlaygroundCanvas = () => {
 
     setContextMenuOpen(true);
   };
-  
+
   // 👇 Close context menu on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -143,7 +195,7 @@ const PlaygroundCanvas = () => {
   const WORLD_RADIUS = 5000;
   const [canvasCenterCoords, setCanvasCenterCoords] = useState({ x: 0, y: 0 });
   const [worldCursorCoords, setWorldCursorCoords] = useState({ x: 0, y: 0 });
-  
+
   useEffect(() => {
     if (!stageRef.current || !pgParentRef.current) return;
 
@@ -162,17 +214,14 @@ const PlaygroundCanvas = () => {
     setCanvasCenterCoords({ x: worldX, y: worldY });
   }, [stagePosition, stageScale, dimensions]);
   const instanceData = useInstanceStore((s) => s.instance);
-  const addInstanceObject = useInstanceStore((s) => s.addInstanceObject);
 
-
-  const instance = useInstanceStore((s) => s.loadInstanceFromLocalStorage);;
   const loadInstance = useInstanceStore((s) => s.loadInstanceFromLocalStorage);
+  const saveInstance = useInstanceStore((s) => s.saveInstanceToLocalStorage);
 
   useEffect(() => {
     loadInstance();
   }, []);
 
-  
   const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
     // Ignore right-click
     if (e.evt.button !== 0) return;
@@ -188,7 +237,6 @@ const PlaygroundCanvas = () => {
 
     const worldX = (pointer.x - pos.x) / scale;
     const worldY = (pointer.y - pos.y) / scale;
-
   };
   const worldToScreen = (worldX: number, worldY: number) => {
     const scale = stageScale;
@@ -204,13 +252,13 @@ const PlaygroundCanvas = () => {
     const scale = stageScale;
     const offsetX = stagePosition.x;
     const offsetY = stagePosition.y;
-  
+
     const worldX = (screenX - offsetX) / scale;
     const worldY = (screenY - offsetY) / scale;
-  
+
     return { x: worldX, y: worldY };
   };
-  
+
   const [hoveredInstances, setHoveredInstances] = useState<PlaygroundObject[]>(
     []
   );
@@ -235,7 +283,7 @@ const PlaygroundCanvas = () => {
       const worldY = (screenY - pos.y) / scale;
 
       setCursorWorld({ x: worldX, y: worldY });
-      
+
       const hovered = instanceData.filter((inst) => {
         const w = 500; // your base size
         const size = w * scale;
@@ -278,7 +326,6 @@ const PlaygroundCanvas = () => {
           : obj
       );
       useInstanceStore.getState().setInstance(updated);
-
     };
 
     const stop = () => setDraggingId(null);
@@ -290,8 +337,7 @@ const PlaygroundCanvas = () => {
       window.removeEventListener("mouseup", stop);
     };
   }, [draggingId, dragOffset]);
-  
-  
+
   return (
     <div
       ref={pgParentRef}
@@ -307,7 +353,9 @@ const PlaygroundCanvas = () => {
       }}
       className="relative h-full overflow-hidden rounded-md shadow-xl select-none ring ring-rose-500/30 shadow-blue-900/20"
     >
-      <div className="absolute z-50 flex flex-col px-3 py-1 text-xs text-white rounded top-2 left-2 bg-black/80 ring-1 ring-white/10">
+      <MacMenubar save={() => saveInstance()} />
+
+      <div className="absolute z-50 flex flex-col px-3 py-1 text-xs text-white rounded top-10 left-2 bg-black/80 ring-1 ring-white/10">
         <div>
           Center: ({canvasCenterCoords.x.toFixed(1)},{" "}
           {canvasCenterCoords.y.toFixed(1)})
