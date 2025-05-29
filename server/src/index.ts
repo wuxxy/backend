@@ -6,6 +6,8 @@ import fs from "fs";
 import { read_json_file } from "./utils/file_manager.js";
 import { StatusCodes } from "http-status-codes";
 import cors from "@fastify/cors";
+import cookie from "@fastify/cookie";
+import jwt from "@fastify/jwt";
 const SETTINGS = read_json_file("./modifiable/settings.json");
 
 const SERVER_PORT: number = parseInt(SETTINGS.PORT) || 3000;
@@ -13,6 +15,32 @@ const SERVER_PORT: number = parseInt(SETTINGS.PORT) || 3000;
 // ######################## MUST CHANGE ######################## //
 /*            */ export const AUTH_PASS = "password"; /*          */
 // #############################################################  //
+import "@fastify/jwt";
+import authRoutes from "./auth.js";
+declare module "@fastify/jwt" {
+  interface FastifyJWT {
+    payload: {
+      id: string;
+      name: string;
+      email: string;
+      role?: string;
+    };
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      role?: string;
+    };
+  }
+}
+declare module "fastify" {
+  interface FastifyInstance {
+    authenticate: (
+      request: FastifyRequest,
+      reply: FastifyReply
+    ) => Promise<void>;
+  }
+}
 
 const fastify = Fastify({
   logger: true,
@@ -32,10 +60,26 @@ fastify.register(cors, {
   credentials: true, // only enable this if you need cookie-based auth
   optionsSuccessStatus: 204,
 });
+fastify.register(cookie);
+fastify.register(jwt, {
+  secret: process.env.JWT_SECRET || "super-secret", // use env var in prod
+  cookie: {
+    cookieName: "token",
+    signed: false,
+  },
+});
+fastify.decorate("authenticate", async function (request, reply) {
+  try {
+    await request.jwtVerify();
+  } catch (err) {
+    reply.status(401).send({ message: "Unauthorized" });
+  }
+});
 fastify.register(import("@fastify/formbody"));
 fastify.decorate("io", new Server(fastify.server));
 
 fastify.register(adminRoutes, { prefix: "/admin" });
+fastify.register(authRoutes, { prefix: "/auth" });
 // Declare a route
 fastify.get("/", async function handler(request, reply) {
   return { hello: "world" };
