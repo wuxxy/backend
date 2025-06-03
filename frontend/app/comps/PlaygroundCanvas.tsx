@@ -7,13 +7,26 @@ import { ContextMenu } from "~/components/ui/context-menu";
 import { CustomContextMenu } from "./PlaygroundContextMenu";
 import { useInstanceStore, useViewportStore, type PlaygroundObject } from "~/lib/playgroundStore";
 import { MethodFormCard } from "./PlaygroundCards";
-import { GripVertical, Home, HomeIcon, SplinePointer } from "lucide-react";
+import {
+  BadgeX,
+  Cross,
+  Delete,
+  GripVertical,
+  Home,
+  HomeIcon,
+  SplinePointer,
+  Trash,
+  Trash2,
+  X,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import PlaygroundComponent from "./PlaygroundComponent";
+import { Button } from "~/components/ui/button";
 
 useStrictMode(true);
 
@@ -337,7 +350,7 @@ const PlaygroundCanvas = () => {
       window.removeEventListener("mouseup", stop);
     };
   }, [draggingId, dragOffset]);
-
+  function deleteBlock(id: string) {}
   return (
     <div
       ref={pgParentRef}
@@ -355,26 +368,46 @@ const PlaygroundCanvas = () => {
     >
       <MacMenubar save={() => saveInstance()} />
 
-      <div className="absolute z-50 flex flex-col px-3 py-1 text-xs text-white rounded top-10 left-2 bg-black/80 ring-1 ring-white/10">
-        <div>
-          Center: ({canvasCenterCoords.x.toFixed(1)},{" "}
-          {canvasCenterCoords.y.toFixed(1)})
+      <div className="absolute z-50 flex flex-col gap-2 m-2">
+        <div className="px-3 py-1 text-xs text-white rounded bg-black/80 ring-1 ring-white/10">
+          <div>
+            Center: ({canvasCenterCoords.x.toFixed(1)},{" "}
+            {canvasCenterCoords.y.toFixed(1)})
+          </div>
+          <div>
+            Cursor: ({worldCursorCoords.x.toFixed(1)},{" "}
+            {worldCursorCoords.y.toFixed(1)})
+          </div>
+          <div>
+            {hoveredInstances
+              .map((s) => ({ type: s.type, id: s.id }))
+              .map(({ type, id }) => (
+                <span key={id}>
+                  {type}:{id}
+                </span>
+              ))}
+          </div>
         </div>
-        <div>
-          Cursor: ({worldCursorCoords.x.toFixed(1)},{" "}
-          {worldCursorCoords.y.toFixed(1)})
-        </div>
-        <div>
-          {hoveredInstances
-            .map((s) => ({ type: s.type, id: s.id }))
-            .map(({ type, id }) => (
-              <span key={id}>
-                {type}:{id}
-              </span>
-            ))}
+        <div className="flex flex-col gap-2 px-3 py-1 text-xs text-white rounded bg-black/80 ring-1 ring-white/10 w-max">
+          {instanceData.map((c) => {
+            const isHovered = hoveredInstances.some((h) => h.id === c.id);
+
+            return (
+              <div className="flex flex-row items-center justify-center p-1 px-3 rounded-md ring-1 ring-pink-400">
+                {c.type}
+                <div className="">
+                  <button
+                    onClick={() => {}}
+                    className="p-2 text-xs text-red-300 transition-all duration-75 hover:text-red-500"
+                  >
+                    <X size={15} />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
-
       {contextMenuOpen && (
         <CustomContextMenu
           position={{ x: cursorPos[0], y: cursorPos[1] }}
@@ -456,49 +489,47 @@ const PlaygroundCanvas = () => {
       >
         <Layer></Layer>
       </Stage>
-      {instanceData
-        .filter((i) => i.type === "request")
-        .map((c) => {
-          const { left, top } = worldToScreen(c.position.x, c.position.y);
-          const baseSize = 300;
+      {instanceData.map((c) => {
+        const { left, top } = worldToScreen(c.position.x, c.position.y);
+        const baseSize = 300;
 
-          const isHovered = hoveredInstances.some((h) => h.id === c.id);
+        const isHovered = hoveredInstances.some((h) => h.id === c.id);
 
-          return (
+        return (
+          <div
+            key={c.id}
+            className="absolute"
+            style={{
+              left: `${left}px`,
+              top: `${top}px`,
+              width: `${(4 / 3) * baseSize}px`,
+              height: `${baseSize}px`,
+              transform: `translate(-50%, -50%) scale(${stageScale})`,
+              transformOrigin: "center",
+              zIndex: 20,
+              pointerEvents: "auto",
+            }}
+          >
             <div
-              key={c.id}
-              className="absolute"
-              style={{
-                left: `${left}px`,
-                top: `${top}px`,
-                width: `${(4 / 3) * baseSize}px`,
-                height: `${baseSize}px`,
-                transform: `translate(-50%, -50%) scale(${stageScale})`,
-                transformOrigin: "center",
-                zIndex: 20,
-                pointerEvents: "auto",
-              }}
-            >
-              <div
-                onMouseDown={(e) => {
-                  e.stopPropagation();
-                  setDraggingId(c.id);
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                setDraggingId(c.id);
 
-                  const cardRect = (
-                    e.currentTarget.parentElement as HTMLDivElement
-                  ).getBoundingClientRect();
-                  const offsetX = e.clientX - cardRect.left;
-                  const offsetY = e.clientY - cardRect.top;
-                  setDragOffset({ x: offsetX, y: offsetY });
-                }}
-                className="absolute top-0 right-0 m-4 text-white cursor-grab hover:text-pink-400"
-              >
-                <GripVertical className="w-4 h-4" />
-              </div>
-              <MethodFormCard />
+                const cardRect = (
+                  e.currentTarget.parentElement as HTMLDivElement
+                ).getBoundingClientRect();
+                const offsetX = e.clientX - cardRect.left;
+                const offsetY = e.clientY - cardRect.top;
+                setDragOffset({ x: offsetX, y: offsetY });
+              }}
+              className="absolute top-0 right-0 m-4 text-white cursor-grab hover:text-pink-400"
+            >
+              <GripVertical className="w-4 h-4" />
             </div>
-          );
-        })}
+            <PlaygroundComponent obj={c} key={c.id} />
+          </div>
+        );
+      })}
     </div>
   );
 };
