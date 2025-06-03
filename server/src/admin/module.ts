@@ -11,6 +11,7 @@ export default async function adminRoutes(
     const pass = req.headers["auth_pass"];
     if (pass !== AUTH_PASS) {
       reply.code(401).send({ error: "Unauthorized" });
+      return;
     }
   });
   fastify.register(settingsRoutes, { prefix: "/settings" });

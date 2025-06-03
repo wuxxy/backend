@@ -73,6 +73,7 @@ fastify.decorate("authenticate", async function (request, reply) {
     await request.jwtVerify();
   } catch (err) {
     reply.status(401).send({ message: "Unauthorized" });
+    return;
   }
 });
 fastify.register(import("@fastify/formbody"));
